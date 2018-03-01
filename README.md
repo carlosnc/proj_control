@@ -1,3 +1,3 @@
 ## Proyecto final
-### Materia: ##Teoria del control 2## 
+### Materia: Teoria del control 2
 
