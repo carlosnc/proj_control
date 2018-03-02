@@ -36,8 +36,9 @@ void initHardware_Init(void)
   uart_initStruct.BaudRate = 115200;
   uart_initStruct.DataConfig = UART_CONFIG_8N1;
   ciaa_uart_init(&uart_initStruct);
-
   ciaa_I2C_init(I2C0, I2C_MODE_POLLING, 100000);
+
+
 }
 
 void initHardware_testOutputs(void)

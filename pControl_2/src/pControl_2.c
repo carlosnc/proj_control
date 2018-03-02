@@ -1,6 +1,7 @@
 #include "inithardware.h"
 #include "edu_ciaa_uart.h"
 #include "mpu9250.h"
+#include "ciaa_servo.h"
 #include "stdlib.h"
 
 // =============================================================================
@@ -21,12 +22,27 @@ void update_data(void);
 // Main function ===============================================================
 int main(void)
 {
+  float32_t angle = -90.0f;
+
   initHardware_Init();
   hello_sequence();
   setup_sensors();
 
+  ciaa_servo_start();
   pauseMs(5000);
-  ciaa_initInterrupt(&MPU_INT_PIN, SCU_MODE_FUNC0);
+  ciaa_setPinHigh(&LED_Rojo);
+  ciaa_servo_zeroPosition(SERVO_CHANNEL_ALL);
+  pauseMs(5000);
+  ciaa_setPinLow(&LED_Rojo);
+
+  for(uint8_t i = 0; i < 18; i++)
+  {
+    ciaa_servo_updatePosition(SERVO_CHANNEL_ALL, angle);
+    angle += 10.0f;
+    pauseMs(200);
+  }
+
+  ciaa_servo_zeroPosition(SERVO_CHANNEL_ALL);
 
   while (1)
     __WFI();
@@ -51,6 +67,13 @@ void setup_sensors(void)
 
   if(mpu9250_init(&mpu9250_InitStruct) == MPU9250_OK)
     ciaa_setPinHigh(&LED_RGB_Verde);
+
+  servo_init_t servo_initStruct;
+  servo_initStruct.pos_zero = 90;
+  servo_initStruct.angle_min = -90;
+  servo_initStruct.angle_max = 90;
+  servo_initStruct.servo_channel = SERVO_CHANNEL_ALL;
+  ciaa_servo_init(&servo_initStruct);
 }
 
 void hello_sequence(void)

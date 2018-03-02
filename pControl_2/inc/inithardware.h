@@ -98,7 +98,7 @@ STATIC INLINE void ciaa_initInterrupt(const ciaa_gpio_t* GPIO, uint16_t scu_fun)
   Chip_PININT_EnableIntHigh(LPC_GPIO_PIN_INT, PININTCH(GPIO->GPIO_Port));
 
   NVIC_ClearPendingIRQ(PIN_INT3_IRQn);
-  NVIC_SetPriority(PIN_INT3_IRQn, (0x01 << 0) - 0x01);
+  NVIC_SetPriority(PIN_INT3_IRQn, (0x01 << 0));
   NVIC_EnableIRQ(PIN_INT3_IRQn);
 }
 
