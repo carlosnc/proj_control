@@ -2,6 +2,7 @@
 #include "edu_ciaa_uart.h"
 #include "mpu9250.h"
 #include "ciaa_servo.h"
+#include "ciaa_estimador.h"
 #include "stdlib.h"
 
 // =============================================================================
@@ -14,6 +15,9 @@ int16_t *pAccel = &aAccel[0];
 int16_t aGyro[3] = { 0 };
 int16_t *pGyro = &aGyro[0];
 
+float32_t aAngles[2] = { 0.0f };
+float32_t *pAngles = &aAngles[0];
+
 // Private functions ===========================================================
 void setup_sensors(void);
 void hello_sequence(void);
@@ -22,27 +26,26 @@ void update_data(void);
 // Main function ===============================================================
 int main(void)
 {
-  float32_t angle = -90.0f;
+  int16_t tmp[10];
 
   initHardware_Init();
   hello_sequence();
   setup_sensors();
 
-  ciaa_servo_start();
-  pauseMs(5000);
-  ciaa_setPinHigh(&LED_Rojo);
-  ciaa_servo_zeroPosition(SERVO_CHANNEL_ALL);
-  pauseMs(5000);
-  ciaa_setPinLow(&LED_Rojo);
+  pauseMs(1000);
 
-  for(uint8_t i = 0; i < 18; i++)
+  if(ciaa_filter_readAngles(pAngles) == FILTER_OK)
   {
-    ciaa_servo_updatePosition(SERVO_CHANNEL_ALL, angle);
-    angle += 10.0f;
-    pauseMs(200);
+    itoa(((int32_t) aAngles[0]/1), &tmp, 10);
+    ciaa_uart_send2Bash(bash_Yellow, &tmp);
+    ciaa_uart_send2Bash(bash_Yellow, (uint8_t *)"\t");
+    itoa(((int32_t) aAngles[1]/1), &tmp, 10);
+    ciaa_uart_send2Bash(bash_Yellow, &tmp);
+    ciaa_uart_send2Bash(bash_Yellow, (uint8_t *)"\n\r");
   }
 
-  ciaa_servo_zeroPosition(SERVO_CHANNEL_ALL);
+  pauseMs(5000);
+  ciaa_initInterrupt(&MPU_INT_PIN, SCU_MODE_FUNC0);
 
   while (1)
     __WFI();
@@ -70,10 +73,15 @@ void setup_sensors(void)
 
   servo_init_t servo_initStruct;
   servo_initStruct.pos_zero = 90;
-  servo_initStruct.angle_min = -90;
-  servo_initStruct.angle_max = 90;
+  servo_initStruct.angle_min = -60;
+  servo_initStruct.angle_max = 60;
   servo_initStruct.servo_channel = SERVO_CHANNEL_ALL;
   ciaa_servo_init(&servo_initStruct);
+
+  filter_init_t filter_initStruct;
+  filter_initStruct.freq_update = 80;
+  filter_initStruct.weight_of_filter = 0.10f;
+  ciaa_filter_init(&filter_initStruct);
 }
 
 void hello_sequence(void)
@@ -102,21 +110,7 @@ void hello_sequence(void)
 
 void update_data(void)
 {
-  uint8_t tmp[10];
-
-  if(mpu9250_readAccelData_int16(pAccel) == MPU9250_OK)
-  {
-    for (uint8_t i = 0; i < 3; i++)
-    {
-      itoa(aAccel[i], &tmp, 10);
-      ciaa_uart_send2Bash(bash_Cyan, &tmp);
-
-      if(i == 2)
-        ciaa_uart_putString((uint8_t *)"\n\r", 2);
-      else
-        ciaa_uart_putString((uint8_t *)"\t", 1);
-    }
-  }
+  ciaa_togglePin(&LED_Verde);
 }
 
 // =============================================================================
