@@ -837,13 +837,7 @@ mpu9250_status_t mpu9250_init( mpu9250_InitStruct* mpu9250_Init )
   if( mpu9250_writeReg(MPU9250_ACCEL_CONFIG2_ADDR, tmpData) != MPU9250_OK )
     return status;
 
-  tmpData = 0x22;
-  if( mpu9250_writeReg(MPU9250_INT_PIN_CONFIG_ADDR, tmpData) != MPU9250_OK )
-    return status;
-
-  tmpData = 0x01;
-  if( mpu9250_writeReg(MPU9250_INT_ENABLE_ADDR, tmpData) != MPU9250_OK )
-    return status;
+  mpu9250_initInterrupt();
 
   switch (mpu9250_Init->Gyro_Scale)
   {
@@ -884,6 +878,27 @@ mpu9250_status_t mpu9250_init( mpu9250_InitStruct* mpu9250_Init )
   }
 
   status = MPU9250_OK;
+  return status;
+}
+
+mpu9250_status_t mpu9250_initInterrupt(void)
+{
+  mpu9250_status_t status = MPU9250_OK;
+  uint8_t tmpData = 0x00;
+
+  tmpData = 149;
+  if(mpu9250_writeReg(MPU9250_SAMPLE_RATE_DIV_ADDR, tmpData) != MPU9250_OK)
+    status = MPU9250_ERROR;
+
+  tmpData = 0x00;
+  if(mpu9250_writeReg(MPU9250_INT_PIN_CONFIG_ADDR, tmpData) != MPU9250_OK)
+    status = MPU9250_ERROR;
+
+  tmpData = 0x01;
+  if(mpu9250_writeReg(MPU9250_INT_ENABLE_ADDR, tmpData) != MPU9250_OK)
+    status = MPU9250_ERROR;
+
+
   return status;
 }
 

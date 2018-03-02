@@ -102,6 +102,7 @@ static const uint8_t MPU9250_INT_DATA_READY_MSK = 0x01;
 
 // Function Prototypes =========================================================
 mpu9250_status_t mpu9250_init(mpu9250_InitStruct* mpu9250_Init);
+mpu9250_status_t mpu9250_initInterrupt(void);
 mpu9250_status_t mpu9250_reset(void);
 mpu9250_status_t mpu9250_getBias(uint8_t samples, uint8_t *pAccel, uint8_t *pGyro);
 

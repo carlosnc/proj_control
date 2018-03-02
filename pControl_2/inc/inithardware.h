@@ -31,27 +31,27 @@ typedef struct
 } ciaa_gpio_t;
 
 // =============================================================================
-STATIC  INLINE uint8_t readPinValue(const ciaa_gpio_t* TEC)
+STATIC  INLINE uint8_t ciaa_readPinValue(const ciaa_gpio_t* TEC)
 {
   return LPC_GPIO_PORT->B[TEC->GPIO_Port][TEC->GPIO_Pin];
 }
 
-STATIC INLINE void setPinHigh(const ciaa_gpio_t* pin)
+STATIC INLINE void ciaa_setPinHigh(const ciaa_gpio_t* pin)
 {
   LPC_GPIO_PORT->SET[pin->GPIO_Port] = (1 << pin->GPIO_Pin);
 }
 
-STATIC INLINE void setPinLow(const ciaa_gpio_t* pin)
+STATIC INLINE void ciaa_setPinLow(const ciaa_gpio_t* pin)
 {
   LPC_GPIO_PORT->CLR[pin->GPIO_Port] = (1 << pin->GPIO_Pin);
 }
 
-STATIC INLINE void setPinToggle(const ciaa_gpio_t* pin)
+STATIC INLINE void ciaa_togglePin(const ciaa_gpio_t* pin)
 {
   LPC_GPIO_PORT->NOT[pin->GPIO_Port] = (1 << pin->GPIO_Pin);
 }
 
-STATIC INLINE void initLED(const ciaa_gpio_t* LED)
+STATIC INLINE void ciaa_initLED(const ciaa_gpio_t* LED)
 {
   uint16_t scu_mode = (SCU_MODE_INACT | SCU_MODE_INBUFF_EN);
 
@@ -62,7 +62,7 @@ STATIC INLINE void initLED(const ciaa_gpio_t* LED)
   LPC_GPIO_PORT->CLR[LED->GPIO_Port] = (1 << LED->GPIO_Pin);
 }
 
-STATIC INLINE void initTec(const ciaa_gpio_t* TEC, ciaa_tec_mode_t Mode)
+STATIC INLINE void ciaa_initTec(const ciaa_gpio_t* TEC, ciaa_tec_mode_t Mode)
 {
   uint16_t scu_mode = (SCU_MODE_INACT | SCU_MODE_INBUFF_EN | SCU_MODE_FUNC0);
   IRQn_Type TEC_IRQn = 0;
@@ -84,10 +84,22 @@ STATIC INLINE void initTec(const ciaa_gpio_t* TEC, ciaa_tec_mode_t Mode)
     NVIC_EnableIRQ(TEC_IRQn);
   }
 }
-STATIC INLINE void initInterrupt(const ciaa_gpio_t* GPIO, uint16_t scu_fun)
+STATIC INLINE void ciaa_initInterrupt(const ciaa_gpio_t* GPIO, uint16_t scu_fun)
 {
   uint16_t scu_mode = (SCU_MODE_INACT | SCU_MODE_INBUFF_EN | scu_fun);
+
+  LPC_SCU->SFSP[GPIO->SCU_Port][GPIO->SCU_Pin] = scu_mode;
+  LPC_GPIO_PORT->DIR[GPIO->GPIO_Port] &= ~(1 << GPIO->GPIO_Pin);
+
   // ToDo: implement.
+  Chip_SCU_GPIOIntPinSel(GPIO->GPIO_Port, GPIO->GPIO_Port, GPIO->GPIO_Pin);
+  Chip_PININT_ClearIntStatus(LPC_GPIO_PIN_INT, PININTCH(GPIO->GPIO_Port));
+  Chip_PININT_SetPinModeEdge(LPC_GPIO_PIN_INT, PININTCH(GPIO->GPIO_Port));
+  Chip_PININT_EnableIntHigh(LPC_GPIO_PIN_INT, PININTCH(GPIO->GPIO_Port));
+
+  NVIC_ClearPendingIRQ(PIN_INT3_IRQn);
+  NVIC_SetPriority(PIN_INT3_IRQn, (0x01 << 0) - 0x01);
+  NVIC_EnableIRQ(PIN_INT3_IRQn);
 }
 
 // =============================================================================
@@ -104,6 +116,7 @@ static const ciaa_gpio_t TEC02 = {1, 1, 0, 8};
 static const ciaa_gpio_t TEC03 = {1, 2, 0, 9};
 static const ciaa_gpio_t TEC04 = {1, 6, 1, 9};
 
+static const ciaa_gpio_t MPU_INT_PIN = {7, 4, 3, 12};
 // =============================================================================
 void initHardware_Init(void);
 void initHardware_testOutputs(void);

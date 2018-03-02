@@ -1,6 +1,6 @@
 /*
  ===============================================================================
- Name        : hd44780.c
+ Name        : inithardware.c
  Author      : $(author)
  Version     : 0.0-alpha1
  Copyright   : $(copyright)
@@ -32,12 +32,12 @@ void initHardware_Init(void)
 
   ciaa_uart_init_t uart_initStruct;
   uart_initStruct.ID = CIAA_UART3;
-  uart_initStruct.Mode = UART_MODE_INTERRUPT;
+  uart_initStruct.Mode = UART_MODE_NORMAL;
   uart_initStruct.BaudRate = 115200;
   uart_initStruct.DataConfig = UART_CONFIG_8N1;
   ciaa_uart_init(&uart_initStruct);
 
-  ciaa_I2C_init(I2C0, I2C_MODE_INTERRUPT, 100000);
+  ciaa_I2C_init(I2C0, I2C_MODE_POLLING, 100000);
 }
 
 void initHardware_testOutputs(void)
@@ -48,7 +48,7 @@ void initHardware_testOutputs(void)
 
   for (uint8_t i = 0; i < 12; i++)
   {
-    setPinToggle(Leds[idx]);
+    ciaa_togglePin(Leds[idx]);
     idx = (i == 5) ? (0) : (idx + 1);
     pauseMs(200);
   }
@@ -62,27 +62,27 @@ static void initSystemClock(void)
 
 static void initLEDs(void)
 {
-  initLED(&LED_RGB_Rojo);
-  initLED(&LED_RGB_Verde);
-  initLED(&LED_RGB_Azul);
+  ciaa_initLED(&LED_RGB_Rojo);
+  ciaa_initLED(&LED_RGB_Verde);
+  ciaa_initLED(&LED_RGB_Azul);
 
-  setPinLow(&LED_RGB_Rojo);
-  setPinLow(&LED_RGB_Verde);
-  setPinLow(&LED_RGB_Azul);
+  ciaa_setPinLow(&LED_RGB_Rojo);
+  ciaa_setPinLow(&LED_RGB_Verde);
+  ciaa_setPinLow(&LED_RGB_Azul);
 
-  initLED(&LED_Rojo);
-  initLED(&LED_Amarillo);
-  initLED(&LED_Verde);
+  ciaa_initLED(&LED_Rojo);
+  ciaa_initLED(&LED_Amarillo);
+  ciaa_initLED(&LED_Verde);
 
-  setPinLow(&LED_Rojo);
-  setPinLow(&LED_Amarillo);
-  setPinLow(&LED_Verde);
+  ciaa_setPinLow(&LED_Rojo);
+  ciaa_setPinLow(&LED_Amarillo);
+  ciaa_setPinLow(&LED_Verde);
 }
 
 static void initButtons(void)
 {
-  initTec(&TEC01, CIAA_TEC_INTERRUPT);
-  initTec(&TEC04, CIAA_TEC_INTERRUPT);
+  ciaa_initTec(&TEC01, CIAA_TEC_INTERRUPT);
+  ciaa_initTec(&TEC04, CIAA_TEC_INTERRUPT);
 }
 
 // EOF =========================================================================

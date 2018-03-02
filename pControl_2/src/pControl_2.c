@@ -7,49 +7,26 @@
 int16_t temperature = 0;
 int16_t *ptemperature = &temperature;
 
+int16_t aAccel[3] = { 0 };
+int16_t *pAccel = &aAccel[0];
+
+int16_t aGyro[3] = { 0 };
+int16_t *pGyro = &aGyro[0];
+
 // Private functions ===========================================================
 void setup_sensors(void);
 void hello_sequence(void);
+void update_data(void);
 
 // Main function ===============================================================
 int main(void)
 {
-  uint8_t tmp[10];
-  uint8_t *ptmp = &tmp[0];
-
-  int16_t accel[3] = {0};
-  int16_t *pAccel = &accel[0];
-
-  int16_t gyro[3] = {0};
-  int16_t *pGyro = &gyro[0];
-
   initHardware_Init();
-
-  setup_sensors();
   hello_sequence();
+  setup_sensors();
 
-  if(mpu9250_readData_int16(pAccel, pGyro) == MPU9250_OK)
-  {
-    for(uint8_t i = 0; i < 3; i++)
-    {
-      itoa(accel[i]%16384, ptmp, 10);
-      ciaa_uart_send2Bash(bash_Yellow, ptmp);
-      if(i == 2)
-        ciaa_uart_send2Bash(bash_Yellow, (uint8_t *)"\n\r");
-      else
-        ciaa_uart_send2Bash(bash_Yellow, (uint8_t *)"\t");
-    }
-
-    for(uint8_t i = 0; i < 3; i++)
-    {
-      itoa(gyro[i]/131, ptmp, 10);
-      ciaa_uart_send2Bash(bash_Yellow, ptmp);
-      if(i == 2)
-        ciaa_uart_send2Bash(bash_Yellow, (uint8_t *)"\n\r");
-      else
-        ciaa_uart_send2Bash(bash_Yellow, (uint8_t *)"\t");
-    }
-  }
+  pauseMs(5000);
+  ciaa_initInterrupt(&MPU_INT_PIN, SCU_MODE_FUNC0);
 
   while (1)
     __WFI();
@@ -73,7 +50,7 @@ void setup_sensors(void)
   mpu9250_InitStruct.Gyro_LPF = MPU9250_GYRO_LPF_41HZ;
 
   if(mpu9250_init(&mpu9250_InitStruct) == MPU9250_OK)
-    setPinHigh(&LED_RGB_Verde);
+    ciaa_setPinHigh(&LED_RGB_Verde);
 }
 
 void hello_sequence(void)
@@ -98,4 +75,31 @@ void hello_sequence(void)
     ciaa_uart_send2Bash(bash_Yellow, (uint8_t *)" C\n\n\r");
   }
 
+}
+
+void update_data(void)
+{
+  uint8_t tmp[10];
+
+  if(mpu9250_readAccelData_int16(pAccel) == MPU9250_OK)
+  {
+    for (uint8_t i = 0; i < 3; i++)
+    {
+      itoa(aAccel[i], &tmp, 10);
+      ciaa_uart_send2Bash(bash_Cyan, &tmp);
+
+      if(i == 2)
+        ciaa_uart_putString((uint8_t *)"\n\r", 2);
+      else
+        ciaa_uart_putString((uint8_t *)"\t", 1);
+    }
+  }
+}
+
+// =============================================================================
+void GPIO3_IRQHandler(void)
+{
+  Chip_PININT_ClearIntStatus(LPC_GPIO_PIN_INT, PININTCH3);
+  ciaa_togglePin(&LED_Amarillo);
+  update_data();
 }
