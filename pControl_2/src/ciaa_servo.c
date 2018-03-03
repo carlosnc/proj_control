@@ -62,8 +62,15 @@ void ciaa_servo_init(servo_initStruct_t *servo_initStruct)
   Chip_SCTPWM_SetDutyCycle(LPC_SCT, 2, tmp);
   Chip_SCTPWM_SetDutyCycle(LPC_SCT, 3, tmp);
 
-  maxDutyCycle = 3957600;
-  minDutyCycle = 3590400;
+//  maxDutyCycle = 3957600;
+//  minDutyCycle = 3590400;
+
+  // 20000 --- 100
+  //   600 --- x = 3  --> 100 - 3 = 97%
+  // 20000 --- 100
+  //  2400 --- x = 12 --> 100 - 12 = 88%
+  maxDutyCycle = Chip_SCTPWM_PercentageToTicks(LPC_SCT, 97);
+  minDutyCycle = Chip_SCTPWM_PercentageToTicks(LPC_SCT, 88);
 
   ticksPerCycle = (maxDutyCycle - minDutyCycle);
 

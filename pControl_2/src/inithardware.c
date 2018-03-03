@@ -17,7 +17,7 @@
 static void initSystemClock(void);
 static void initLEDs(void);
 static void initButtons(void);
-static void initHardware(void);
+static void initPeripherals_and_Sensor(void);
 
 // Public functions ============================================================
 void initHardware_Init(void)
@@ -30,16 +30,7 @@ void initHardware_Init(void)
 
   initLEDs();
   initButtons();
-
-  ciaa_uart_init_t uart_initStruct;
-  uart_initStruct.ID = CIAA_UART3;
-  uart_initStruct.Mode = UART_MODE_NORMAL;
-  uart_initStruct.BaudRate = 115200;
-  uart_initStruct.DataConfig = UART_CONFIG_8N1;
-  ciaa_uart_init(&uart_initStruct);
-  ciaa_I2C_init(I2C0, I2C_MODE_POLLING, 100000);
-
-
+  initPeripherals_and_Sensor();
 }
 
 void initHardware_testOutputs(void)
@@ -86,8 +77,17 @@ static void initButtons(void)
   ciaa_initTec(&TEC01, CIAA_TEC_INTERRUPT);
 }
 
-static void initHardware(void)
+static void initPeripherals_and_Sensor(void)
 {
+  ciaa_uart_init_t uart_initStruct;
+  uart_initStruct.ID = CIAA_UART3;
+  uart_initStruct.Mode = UART_MODE_NORMAL;
+  uart_initStruct.BaudRate = 115200;
+  uart_initStruct.DataConfig = UART_CONFIG_8N1;
+  ciaa_uart_init(&uart_initStruct);
+
+  ciaa_I2C_init(I2C0, I2C_MODE_POLLING, 100000);
+
   mpu9250_InitStruct_t mpu9250_InitStruct;
   mpu9250_InitStruct.Accel_Scale = MPU9250_ACCEL_FULLSCALE_2G;
   mpu9250_InitStruct.Accel_Axes  = MPU9250_ACCEL_XYZ_ENABLE;
@@ -96,7 +96,8 @@ static void initHardware(void)
   mpu9250_InitStruct.Gyro_Axes   = MPU9250_GYRO_XYZ_ENABLE;
   mpu9250_InitStruct.Gyro_LPF    = MPU9250_GYRO_LPF_41HZ;
   mpu9250_InitStruct.SampleRate  = 99;
-  mpu9250_init(&mpu9250_InitStruct);
+  if( mpu9250_init(&mpu9250_InitStruct) == MPU9250_OK)
+    ciaa_blinkPin(&LED_Verde);
 
   servo_initStruct_t servo_initStruct;
   servo_initStruct.servo_channel = SERVO_CHANNEL_ALL;

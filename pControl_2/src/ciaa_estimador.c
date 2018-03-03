@@ -12,7 +12,7 @@ volatile float32_t previous_pitch[2] = { 0.0f };
 volatile float32_t previous_roll[2] = { 0.0f };
 
 // =============================================================================
-STATIC INLINE float32_t RAD2DEG(x)
+STATIC INLINE float32_t RAD2DEG(float32_t x)
 {
   return ((float32_t) (x*(180.0f/PI)));
 }
@@ -39,8 +39,6 @@ void ciaa_filter_init(filter_initStruct_t *filter_InitStruct)
 filter_status_t ciaa_filter_readAngles(float32_t *pAngles)
 {
   filter_status_t status = FILTER_ERROR;
-
-  float32_t tmp = 0.0f;
 
   float32_t aAngBuff[4] = { 0.0f };
   float32_t aAccelData[3] = { 0.0f };
@@ -69,7 +67,6 @@ filter_status_t ciaa_filter_readComplementaryFilter( float32_t* pFilterOutput )
    * aAngBuff[4]: acell_Pitch, accel_Roll, gyro_Pitch, gyro_Roll
    * past_gyro[2]: past_pitch, past_roll
    */
-  float32_t tmp = 0.0f;
 
   float32_t aAngBuff[4] = { 0.0f };
   float32_t aAccelData[3] = { 0.0f };

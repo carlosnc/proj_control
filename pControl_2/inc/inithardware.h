@@ -42,6 +42,25 @@ typedef struct
 } ciaa_gpio_t;
 
 // =============================================================================
+static const ciaa_gpio_t LED_RGB_Rojo    = {2, 0, 5, 0};
+static const ciaa_gpio_t LED_RGB_Verde   = {2, 1, 5, 1};
+static const ciaa_gpio_t LED_RGB_Azul    = {2, 2, 5, 2};
+
+static const ciaa_gpio_t LED_Rojo        = {2, 10, 0, 14};
+static const ciaa_gpio_t LED_Amarillo    = {2, 11, 1, 11};
+static const ciaa_gpio_t LED_Verde       = {2, 12, 1, 12};
+
+static const ciaa_gpio_t TEC01 = {1, 0, 0, 4};
+static const ciaa_gpio_t TEC02 = {1, 1, 0, 8};
+static const ciaa_gpio_t TEC03 = {1, 2, 0, 9};
+static const ciaa_gpio_t TEC04 = {1, 6, 1, 9};
+
+static const ciaa_gpio_t MPU_INT_PIN = {7, 4, 3, 12};
+
+static const uint8_t sSubjectMsg[30] = "\t\t ..:: Teoria del Control 2";
+static const uint8_t sAuthorMsg[25] = "Contrera Carlos ::..\n\n\r";
+
+// =============================================================================
 STATIC  INLINE uint8_t ciaa_readPinValue(const ciaa_gpio_t* TEC)
 {
   return LPC_GPIO_PORT->B[TEC->GPIO_Port][TEC->GPIO_Pin];
@@ -60,6 +79,13 @@ STATIC INLINE void ciaa_setPinLow(const ciaa_gpio_t* pin)
 STATIC INLINE void ciaa_togglePin(const ciaa_gpio_t* pin)
 {
   LPC_GPIO_PORT->NOT[pin->GPIO_Port] = (1 << pin->GPIO_Pin);
+}
+
+STATIC INLINE void ciaa_blinkPin(const ciaa_gpio_t* pin)
+{
+  ciaa_togglePin(pin);
+  pauseMs(200);
+  ciaa_togglePin(pin);
 }
 
 STATIC INLINE void ciaa_initLED(const ciaa_gpio_t* LED)
@@ -102,7 +128,6 @@ STATIC INLINE void ciaa_initInterrupt(const ciaa_gpio_t* GPIO, uint16_t scu_fun)
   LPC_SCU->SFSP[GPIO->SCU_Port][GPIO->SCU_Pin] = scu_mode;
   LPC_GPIO_PORT->DIR[GPIO->GPIO_Port] &= ~(1 << GPIO->GPIO_Pin);
 
-  // ToDo: implement.
   Chip_SCU_GPIOIntPinSel(GPIO->GPIO_Port, GPIO->GPIO_Port, GPIO->GPIO_Pin);
   Chip_PININT_ClearIntStatus(LPC_GPIO_PIN_INT, PININTCH(GPIO->GPIO_Port));
   Chip_PININT_SetPinModeEdge(LPC_GPIO_PIN_INT, PININTCH(GPIO->GPIO_Port));
@@ -113,21 +138,23 @@ STATIC INLINE void ciaa_initInterrupt(const ciaa_gpio_t* GPIO, uint16_t scu_fun)
   NVIC_EnableIRQ(PIN_INT3_IRQn);
 }
 
-// =============================================================================
-static const ciaa_gpio_t LED_RGB_Rojo    = {2, 0, 5, 0};
-static const ciaa_gpio_t LED_RGB_Verde   = {2, 1, 5, 1};
-static const ciaa_gpio_t LED_RGB_Azul    = {2, 2, 5, 2};
+STATIC INLINE void ciaa_deInitInterrupt(const ciaa_gpio_t* GPIO, uint16_t scu_fun)
+{
+  (void)(GPIO);
+  (void)(scu_fun);
 
-static const ciaa_gpio_t LED_Rojo        = {2, 10, 0, 14};
-static const ciaa_gpio_t LED_Amarillo    = {2, 11, 1, 11};
-static const ciaa_gpio_t LED_Verde       = {2, 12, 1, 12};
+  NVIC_DisableIRQ(PIN_INT3_IRQn);
+}
 
-static const ciaa_gpio_t TEC01 = {1, 0, 0, 4};
-static const ciaa_gpio_t TEC02 = {1, 1, 0, 8};
-static const ciaa_gpio_t TEC03 = {1, 2, 0, 9};
-static const ciaa_gpio_t TEC04 = {1, 6, 1, 9};
+STATIC INLINE void ciaa_initSerialPortMessage(void)
+{
+  ciaa_uart_send2Bash(bash_cursor2Home, (uint8_t *)"\r");
+  ciaa_uart_send2Bash(bash_ClearScreen, (uint8_t *)"\r");
+  ciaa_uart_send2Bash(bash_Green, sSubjectMsg);
+  ciaa_uart_send2Bash(bash_Normal, (uint8_t *)" - ");
+  ciaa_uart_send2Bash(bash_Blue, sAuthorMsg);
+}
 
-static const ciaa_gpio_t MPU_INT_PIN = {7, 4, 3, 12};
 // =============================================================================
 void initHardware_Init(void);
 void initHardware_testOutputs(void);
