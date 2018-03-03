@@ -21,7 +21,7 @@ typedef struct
      int16_t angle_min;
      int16_t angle_max;
      servo_channel_t servo_channel;
-} servo_init_t;
+} servo_initStruct_t;
 
 typedef struct
 {
@@ -37,7 +37,7 @@ static const servo_output_t SERVO_02 = {4, 1, 2, 1};
 static const servo_output_t SERVO_03 = {4, 3, 3, 3};
 
 // =============================================================================
-void ciaa_servo_init(servo_init_t *servo_initStruct);
+void ciaa_servo_init(servo_initStruct_t *servo_initStruct);
 void ciaa_servo_check(servo_channel_t servo_channel);
 void ciaa_servo_zeroPosition(servo_channel_t servo_channel);
 void ciaa_servo_updatePosition(servo_channel_t servo_channel, float32_t angle);

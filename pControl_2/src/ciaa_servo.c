@@ -30,7 +30,7 @@ STATIC INLINE void servo_configChannel(const servo_output_t* servo)
 static uint32_t angle_to_pwm(float32_t angle);
 
 // =============================================================================
-void ciaa_servo_init(servo_init_t *servo_initStruct)
+void ciaa_servo_init(servo_initStruct_t *servo_initStruct)
 {
   uint32_t maxDutyCycle, minDutyCycle;
 

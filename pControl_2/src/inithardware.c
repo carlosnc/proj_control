@@ -17,6 +17,7 @@
 static void initSystemClock(void);
 static void initLEDs(void);
 static void initButtons(void);
+static void initHardware(void);
 
 // Public functions ============================================================
 void initHardware_Init(void)
@@ -83,7 +84,31 @@ static void initLEDs(void)
 static void initButtons(void)
 {
   ciaa_initTec(&TEC01, CIAA_TEC_INTERRUPT);
-  ciaa_initTec(&TEC04, CIAA_TEC_INTERRUPT);
+}
+
+static void initHardware(void)
+{
+  mpu9250_InitStruct_t mpu9250_InitStruct;
+  mpu9250_InitStruct.Accel_Scale = MPU9250_ACCEL_FULLSCALE_2G;
+  mpu9250_InitStruct.Accel_Axes  = MPU9250_ACCEL_XYZ_ENABLE;
+  mpu9250_InitStruct.Accel_LPF   = MPU9250_ACCEL_LPF_44_8HZ;
+  mpu9250_InitStruct.Gyro_Scale  = MPU9250_GYRO_FULLSCALE_250DPS;
+  mpu9250_InitStruct.Gyro_Axes   = MPU9250_GYRO_XYZ_ENABLE;
+  mpu9250_InitStruct.Gyro_LPF    = MPU9250_GYRO_LPF_41HZ;
+  mpu9250_InitStruct.SampleRate  = 99;
+  mpu9250_init(&mpu9250_InitStruct);
+
+  servo_initStruct_t servo_initStruct;
+  servo_initStruct.servo_channel = SERVO_CHANNEL_ALL;
+  servo_initStruct.angle_min = -60;
+  servo_initStruct.angle_max =  60;
+  servo_initStruct.pos_zero  =  90;
+  ciaa_servo_init(&servo_initStruct);
+
+  filter_initStruct_t filter_initStruct;
+  filter_initStruct.freq_update = 100;
+  filter_initStruct.weight_of_filter = 0.99;
+  ciaa_filter_init(&filter_initStruct);
 }
 
 // EOF =========================================================================

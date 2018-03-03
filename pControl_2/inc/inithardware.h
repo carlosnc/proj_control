@@ -16,6 +16,17 @@
 #define INITHARDWARE_H_
 
 // =============================================================================
+#include "edu_ciaa_uart.h"
+#include "ciaa_servo.h"
+#include "ciaa_estimador.h"
+
+// =============================================================================
+typedef enum
+{
+  APP_STOPPED = 0x00,
+  APP_RUNNING,
+} ciaa_app_state_t;
+
 typedef enum
 {
   CIAA_TEC_POLLING = 0,
@@ -80,7 +91,7 @@ STATIC INLINE void ciaa_initTec(const ciaa_gpio_t* TEC, ciaa_tec_mode_t Mode)
     (TEC->GPIO_Port == 0) ? (TEC_IRQn = PIN_INT0_IRQn) : (TEC_IRQn = PIN_INT1_IRQn);
 
     NVIC_ClearPendingIRQ(TEC_IRQn);
-    NVIC_SetPriority(TEC_IRQn, ((0x01 << 3) - 0x01));
+    NVIC_SetPriority(TEC_IRQn, (0x01 << 0));
     NVIC_EnableIRQ(TEC_IRQn);
   }
 }
@@ -98,7 +109,7 @@ STATIC INLINE void ciaa_initInterrupt(const ciaa_gpio_t* GPIO, uint16_t scu_fun)
   Chip_PININT_EnableIntHigh(LPC_GPIO_PIN_INT, PININTCH(GPIO->GPIO_Port));
 
   NVIC_ClearPendingIRQ(PIN_INT3_IRQn);
-  NVIC_SetPriority(PIN_INT3_IRQn, (0x01 << 0));
+  NVIC_SetPriority(PIN_INT3_IRQn, (0x01 << 1));
   NVIC_EnableIRQ(PIN_INT3_IRQn);
 }
 

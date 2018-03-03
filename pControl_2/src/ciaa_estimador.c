@@ -12,7 +12,10 @@ volatile float32_t previous_pitch[2] = { 0.0f };
 volatile float32_t previous_roll[2] = { 0.0f };
 
 // =============================================================================
-#define RAD2DEG(x)  ((float32_t) (x*(180.0f/PI)))
+STATIC INLINE float32_t RAD2DEG(x)
+{
+  return ((float32_t) (x*(180.0f/PI)));
+}
 
 STATIC INLINE void sumPower_float32_t(float32_t *pSource, uint8_t len, float32_t *pRes)
 {
@@ -27,7 +30,7 @@ static void enormalize_measure(float32_t *aData);
 static void ecomplementary_filter(float32_t *Data, float32_t *gData, float32_t *filtered_angle);
 
 // =============================================================================
-void ciaa_filter_init(filter_init_t *filter_InitStruct)
+void ciaa_filter_init(filter_initStruct_t *filter_InitStruct)
 {
   dt = ((float32_t) 1 / filter_InitStruct->freq_update);
   weight = filter_InitStruct->weight_of_filter;

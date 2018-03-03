@@ -93,7 +93,7 @@ typedef struct
   mpu9250_Accel_Axes_t Accel_Axes;
   mpu9250_Accel_Scale_t Accel_Scale;
   mpu9250_Accel_LowPassFilter_t Accel_LPF;
-} mpu9250_InitStruct;
+} mpu9250_InitStruct_t;
 
 // Public constants ============================================================
 static const uint8_t MPU9250_DEVICE_ID = 0x71;
@@ -101,10 +101,13 @@ static const uint8_t MPU9250_CMD_RESET = 0x80;
 static const uint8_t MPU9250_INT_DATA_READY_MSK = 0x01;
 
 // Function Prototypes =========================================================
-mpu9250_status_t mpu9250_init(mpu9250_InitStruct* mpu9250_Init);
+mpu9250_status_t mpu9250_init(mpu9250_InitStruct_t* mpu9250_Init);
 mpu9250_status_t mpu9250_initInterrupt(void);
 mpu9250_status_t mpu9250_reset(void);
+// ToDo: Implement
 mpu9250_status_t mpu9250_getBias(uint8_t samples, uint8_t *pAccel, uint8_t *pGyro);
+mpu9250_status_t mpu9250_getResolution_int16(int16_t *pResolution);
+mpu9250_status_t mpu9250_getResolution_float(float32_t *pResolution);
 
 uint8_t mpu9250_readID(void);
 

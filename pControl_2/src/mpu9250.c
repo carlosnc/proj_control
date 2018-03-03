@@ -791,7 +791,7 @@ static mpu9250_status_t mpu9250_readBytes(const uint8_t regAddr, uint8_t *pData,
 
 // Public Functions ============================================================
 
-mpu9250_status_t mpu9250_init( mpu9250_InitStruct* mpu9250_Init )
+mpu9250_status_t mpu9250_init( mpu9250_InitStruct_t* mpu9250_Init )
 {
   mpu9250_status_t status = MPU9250_ERROR;
   uint8_t tmpData = 0x00;
