@@ -12,12 +12,12 @@ volatile float32_t previous_pitch[2] = { 0.0f };
 volatile float32_t previous_roll[2] = { 0.0f };
 
 // =============================================================================
-STATIC INLINE float32_t RAD2DEG(float32_t x)
+static inline float32_t RAD2DEG(float32_t x)
 {
   return ((float32_t) (x*(180.0f/PI)));
 }
 
-STATIC INLINE void sumPower_float32_t(float32_t *pSource, uint8_t len, float32_t *pRes)
+static inline void sumPower_float32_t(float32_t *pSource, uint8_t len, float32_t *pRes)
 {
   for(uint8_t i = 0; i < len; i++)
     *pRes += (pSource[i]*pSource[i]);

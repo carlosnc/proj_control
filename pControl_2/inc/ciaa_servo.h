@@ -48,5 +48,9 @@ static inline void ciaa_servo_start(void)
   Chip_SCTPWM_Start(LPC_SCT);
 }
 
+static inline void ciaa_servo_stop(void)
+{
+  Chip_SCTPWM_Stop(LPC_SCT);
+}
 // =============================================================================
 #endif /* CIAA_SERVO_H_ */

@@ -1,6 +1,10 @@
 
 #include "edu_ciaa_uart.h"
+#include "stdlib.h"
 #include "string.h"
+
+#pragma GCC diagnostic ignored "-Wpointer-sign";
+#pragma GCC diagnostic ignored "-Wincompatible-pointer-types";
 
 // =============================================================================
 typedef struct
@@ -30,12 +34,17 @@ static const uint16_t SCU_UART3_TX_MODE = (SCU_MODE_INACT | SCU_MODE_FUNC2);
 static const uint16_t SCU_UART3_RX_MODE = (SCU_MODE_INACT | SCU_MODE_INBUFF_EN | SCU_MODE_ZIF_DIS | SCU_MODE_FUNC2);
 
 // =============================================================================
-STATIC INLINE void ciaa_uart_putChar(uint8_t c)
+static inline void ciaa_uart_putChar(uint8_t c)
 {
   while(!(Chip_UART_ReadLineStatus(idUART) & UART_LSR_TEMT))
     __NOP();
 
   Chip_UART_SendByte(idUART, c);
+}
+
+static inline uint8_t ciaa_uart_decimal_to_Int(float32_t x)
+{
+  return (uint8_t)((x - (int16_t)x)*100);
 }
 
 // Public functions ============================================================
@@ -110,12 +119,6 @@ void ciaa_uart_send2Bash(const bash_cmd_t *bash_cmd, const uint8_t *string)
   ciaa_uart_putString(ptmp, BASH_SIZE);
 }
 
-void ciaa_uart_sendData(uint8_t *pData, uint8_t vector_len, ciaa_uart_data_format_t mode)
-{
-  // ToDo: implement.
-  __NOP();
-}
-
 void ciaa_uart_putString(const uint8_t *string, uint8_t len)
 {
   uint8_t idx = len;
@@ -124,6 +127,81 @@ void ciaa_uart_putString(const uint8_t *string, uint8_t len)
   {
     ciaa_uart_putChar(*string++);
     idx--;
+  }
+}
+
+void ciaa_uart_sendData(float32_t *pData, uint8_t vector_len, ciaa_uart_data_format_t mode)
+{
+  uint8_t sTmp[10];
+  uint8_t sSeparator;
+  uint8_t *pSeparator = &sSeparator;
+  uint8_t decimal = 0;
+
+  switch (mode & ~0x0001)
+  {
+    case UART_DATA_FORMAT_LF:
+      pSeparator = (uint8_t *)"\n";
+      break;
+    case UART_DATA_FORMAT_SPACE:
+      pSeparator = (uint8_t *)" ";
+      break;
+    case UART_DATA_FORMAT_TAB:
+      pSeparator = (uint8_t *)"\t";
+      break;
+    case UART_DATA_FORMAT_BS:
+      pSeparator = (uint8_t *)"/";
+      break;
+    default:
+      break;
+  }
+
+  if( mode & UART_DATA_LOG )
+  {
+    for (uint8_t i = 0; i < vector_len; i++)
+    {
+      memset(sTmp, '\0', 10);
+      itoa((int16_t) pData[i], &sTmp, 10);
+      ciaa_uart_putString(sTmp, 10);
+      ciaa_uart_putString((uint8_t *) ".", 1);
+      decimal = ciaa_uart_decimal_to_Int(pData[i]);
+      itoa(decimal, &sTmp, 10);
+      ciaa_uart_putString(sTmp, 10);
+      ciaa_uart_putString(pSeparator, 1);
+    }
+    if( pSeparator != (uint8_t *)"\n" )
+      ciaa_uart_putString((uint8_t *) "\n\r", 2);
+  }
+  else
+  {
+    if(pSeparator == (uint8_t *)"\n")
+      pSeparator = (uint8_t *)"\t";
+
+    ciaa_uart_send2Bash(bash_eraseLine, (uint8_t *)"\r");
+
+    for (uint8_t i = 0; i < vector_len; i++)
+    {
+      memset(sTmp, '\0', 10);
+      itoa((int16_t) pData[i], &sTmp, 10);
+
+      if(pData[i] >= 0.0f)
+      {
+        ciaa_uart_send2Bash(bash_Green, sTmp);
+        decimal = ciaa_uart_decimal_to_Int(pData[i]);
+        itoa(decimal, &sTmp, 10);
+        ciaa_uart_putString((uint8_t *) ".", 1);
+        ciaa_uart_send2Bash(bash_Green, sTmp);
+      }
+      else
+      {
+        ciaa_uart_send2Bash(bash_Red, sTmp);
+        decimal = ciaa_uart_decimal_to_Int(pData[i]);
+        itoa(decimal, &sTmp, 10);
+        ciaa_uart_putString((uint8_t *) ".", 1);
+        ciaa_uart_send2Bash(bash_Red, sTmp);
+      }
+      if(i < (vector_len - 1))
+        ciaa_uart_putString(pSeparator, 1);
+    }
   }
 }
 

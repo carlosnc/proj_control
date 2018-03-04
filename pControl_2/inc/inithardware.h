@@ -61,34 +61,34 @@ static const uint8_t sSubjectMsg[30] = "\t\t ..:: Teoria del Control 2";
 static const uint8_t sAuthorMsg[25] = "Contrera Carlos ::..\n\n\r";
 
 // =============================================================================
-STATIC  INLINE uint8_t ciaa_readPinValue(const ciaa_gpio_t* TEC)
+static  inline uint8_t ciaa_readPinValue(const ciaa_gpio_t* TEC)
 {
   return LPC_GPIO_PORT->B[TEC->GPIO_Port][TEC->GPIO_Pin];
 }
 
-STATIC INLINE void ciaa_setPinHigh(const ciaa_gpio_t* pin)
+static inline void ciaa_setPinHigh(const ciaa_gpio_t* pin)
 {
   LPC_GPIO_PORT->SET[pin->GPIO_Port] = (1 << pin->GPIO_Pin);
 }
 
-STATIC INLINE void ciaa_setPinLow(const ciaa_gpio_t* pin)
+static inline void ciaa_setPinLow(const ciaa_gpio_t* pin)
 {
   LPC_GPIO_PORT->CLR[pin->GPIO_Port] = (1 << pin->GPIO_Pin);
 }
 
-STATIC INLINE void ciaa_togglePin(const ciaa_gpio_t* pin)
+static inline void ciaa_togglePin(const ciaa_gpio_t* pin)
 {
   LPC_GPIO_PORT->NOT[pin->GPIO_Port] = (1 << pin->GPIO_Pin);
 }
 
-STATIC INLINE void ciaa_blinkPin(const ciaa_gpio_t* pin)
+static inline void ciaa_blinkPin(const ciaa_gpio_t* pin)
 {
   ciaa_togglePin(pin);
   pauseMs(200);
   ciaa_togglePin(pin);
 }
 
-STATIC INLINE void ciaa_initLED(const ciaa_gpio_t* LED)
+static inline void ciaa_initLED(const ciaa_gpio_t* LED)
 {
   uint16_t scu_mode = (SCU_MODE_INACT | SCU_MODE_INBUFF_EN);
 
@@ -99,7 +99,7 @@ STATIC INLINE void ciaa_initLED(const ciaa_gpio_t* LED)
   LPC_GPIO_PORT->CLR[LED->GPIO_Port] = (1 << LED->GPIO_Pin);
 }
 
-STATIC INLINE void ciaa_initTec(const ciaa_gpio_t* TEC, ciaa_tec_mode_t Mode)
+static inline void ciaa_initTec(const ciaa_gpio_t* TEC, ciaa_tec_mode_t Mode)
 {
   uint16_t scu_mode = (SCU_MODE_INACT | SCU_MODE_INBUFF_EN | SCU_MODE_FUNC0);
   IRQn_Type TEC_IRQn = 0;
@@ -121,7 +121,7 @@ STATIC INLINE void ciaa_initTec(const ciaa_gpio_t* TEC, ciaa_tec_mode_t Mode)
     NVIC_EnableIRQ(TEC_IRQn);
   }
 }
-STATIC INLINE void ciaa_initInterrupt(const ciaa_gpio_t* GPIO, uint16_t scu_fun)
+static inline void ciaa_initInterrupt(const ciaa_gpio_t* GPIO, uint16_t scu_fun)
 {
   uint16_t scu_mode = (SCU_MODE_INACT | SCU_MODE_INBUFF_EN | scu_fun);
 
@@ -138,7 +138,7 @@ STATIC INLINE void ciaa_initInterrupt(const ciaa_gpio_t* GPIO, uint16_t scu_fun)
   NVIC_EnableIRQ(PIN_INT3_IRQn);
 }
 
-STATIC INLINE void ciaa_deInitInterrupt(const ciaa_gpio_t* GPIO, uint16_t scu_fun)
+static inline void ciaa_deInitInterrupt(const ciaa_gpio_t* GPIO, uint16_t scu_fun)
 {
   (void)(GPIO);
   (void)(scu_fun);
@@ -146,13 +146,18 @@ STATIC INLINE void ciaa_deInitInterrupt(const ciaa_gpio_t* GPIO, uint16_t scu_fu
   NVIC_DisableIRQ(PIN_INT3_IRQn);
 }
 
-STATIC INLINE void ciaa_initSerialPortMessage(void)
+static inline void ciaa_initSerialPortMessage(void)
 {
   ciaa_uart_send2Bash(bash_cursor2Home, (uint8_t *)"\r");
   ciaa_uart_send2Bash(bash_ClearScreen, (uint8_t *)"\r");
   ciaa_uart_send2Bash(bash_Green, sSubjectMsg);
   ciaa_uart_send2Bash(bash_Normal, (uint8_t *)" - ");
   ciaa_uart_send2Bash(bash_Blue, sAuthorMsg);
+}
+
+static inline uint8_t ciaa_Decimal_to_Int(float32_t x)
+{
+  return ((x - (int16_t)x)*100);
 }
 
 // =============================================================================

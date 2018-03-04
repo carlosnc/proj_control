@@ -886,7 +886,7 @@ mpu9250_status_t mpu9250_initInterrupt(void)
   mpu9250_status_t status = MPU9250_OK;
   uint8_t tmpData = 0x00;
 
-  tmpData = 149;
+  tmpData = 24;
   if(mpu9250_writeReg(MPU9250_SAMPLE_RATE_DIV_ADDR, tmpData) != MPU9250_OK)
     status = MPU9250_ERROR;
 
@@ -917,6 +917,106 @@ mpu9250_status_t mpu9250_reset(void)
   return status;
 }
 
+mpu9250_status_t mpu9250_getBias_int16(uint8_t samples, int16_t *pAccel, int16_t *pGyro)
+{
+  mpu9250_status_t status = MPU9250_OK;
+
+  int16_t accelData[3] = { 0 };
+  int16_t *pAccelData = &accelData[0];
+  int16_t gyroData[3] = { 0 };
+  int16_t *pGyroData = &gyroData[0];
+
+  int32_t accelTmp[3] = { 0 };
+  int32_t gyroTmp[3] = { 0 };
+
+  for (uint8_t i = 0; i < samples; i++)
+  {
+    if( mpu9250_readData_int16(pAccelData, pGyroData) == MPU9250_OK )
+    {
+      for (uint8_t u = 0; u < 3; u++)
+      {
+        accelTmp[u] += pAccelData[u];
+        gyroTmp[u] += pGyroData[u];
+      }
+    }
+    else
+      status = MPU9250_ERROR;
+  }
+
+  for (uint8_t i = 0; i < 3; i++)
+  {
+    pAccel[i] = (int16_t) (accelTmp[i] / samples);
+    pGyro[i] = (int16_t) (gyroTmp[i] / samples);
+  }
+
+  return status;
+}
+
+mpu9250_status_t mpu9250_getBias_float(uint8_t samples, float32_t *pAccel, float32_t *pGyro)
+{
+  mpu9250_status_t status = MPU9250_OK;
+
+  float32_t accelData[3] = { 0 };
+  float32_t *pAccelData = &accelData[0];
+  float32_t gyroData[3] = { 0 };
+  float32_t *pGyroData = &gyroData[0];
+
+  float32_t accelTmp[3] = { 0.0f };
+  float32_t gyroTmp[3] = { 0.0f };
+
+  for (uint8_t i = 0; i < samples; i++)
+  {
+    if( mpu9250_readData_float(pAccelData, pGyroData) == MPU9250_OK )
+    {
+      for (uint8_t u = 0; u < 3; u++)
+      {
+        accelTmp[u] += pAccelData[u];
+        gyroTmp[u] += pGyroData[u];
+      }
+    }
+    else
+      status = MPU9250_ERROR;
+  }
+
+  for (uint8_t i = 0; i < 3; i++)
+  {
+    pAccel[i] = (accelTmp[i] / samples);
+    pGyro[i]  = (gyroTmp[i] / samples);
+  }
+
+  return status;
+}
+
+mpu9250_status_t mpu9250_getResolution_int16(int16_t *pResolution)
+{
+  mpu9250_status_t status = MPU9250_OK;
+
+  if( (aResolution != 0) && (gResolution != 0.0f) )
+  {
+    pResolution[1] = aResolution;
+    pResolution[2] = (int16_t)gResolution;
+  }
+  else
+    status = MPU9250_ERROR;
+
+  return status;
+}
+
+mpu9250_status_t mpu9250_getResolution_float(float32_t *pResolution)
+{
+  mpu9250_status_t status = MPU9250_OK;
+
+  if( (aResolution != 0) && (gResolution != 0.0f) )
+  {
+    pResolution[1] = (float32_t)aResolution;
+    pResolution[2] = gResolution;
+  }
+  else
+    status = MPU9250_ERROR;
+
+  return status;
+}
+
 uint8_t mpu9250_readID(void)
 {
   uint8_t devID = 0x00;
@@ -941,7 +1041,6 @@ mpu9250_status_t mpu9250_readTemperature_int16(int16_t *pTemperature)
     status = MPU9250_OK;
 
   *pTemperature = (int16_t) (((int16_t) rawData[0] << 8) | rawData[1]);
-  *pTemperature = (*pTemperature - 3338) + 2100;
 
   return status;
 }

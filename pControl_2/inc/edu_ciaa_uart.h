@@ -12,6 +12,7 @@
 
 // =============================================================================
 typedef uint8_t bash_cmd_t;
+typedef float float32_t;
 
 typedef enum
 {
@@ -29,9 +30,12 @@ typedef enum
 
 typedef enum
 {
-  UART_DATA_FORMAT_TAB = 0,
-  UART_DATA_FORMAT_SPACE,
-  UART_DATA_FORMAT_LF,
+  UART_DATA_DISPLAY = 0,
+  UART_DATA_LOG = (0x01 << 0),
+  UART_DATA_FORMAT_TAB = (0x01 << 1),
+  UART_DATA_FORMAT_SPACE = (0x01 << 2),
+  UART_DATA_FORMAT_LF = (0x01 << 3),
+  UART_DATA_FORMAT_BS = (0x01 << 4),
 } ciaa_uart_data_format_t;
 
 typedef enum
@@ -78,10 +82,9 @@ static const bash_cmd_t bash_Yellow[]      = "\033[1;33m";
 // Public functions ============================================================
 void ciaa_uart_init(ciaa_uart_init_t *UART_initStruct);
 void ciaa_uart_send2Bash(const bash_cmd_t *bash_cmd, const uint8_t *string);
-void ciaa_uart_sendData(uint8_t *pData, uint8_t vector_len, ciaa_uart_data_format_t mode);
 void ciaa_uart_putString(const uint8_t *string, uint8_t len);
-
-// =============================================================================
+// ToDo: implement.
+void ciaa_uart_sendData(float32_t *pData, uint8_t vector_len, ciaa_uart_data_format_t mode);
 
 #endif /* EDU_CIAA_UART_H_ */
 // EOF =========================================================================

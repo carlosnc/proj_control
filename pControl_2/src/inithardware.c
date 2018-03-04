@@ -101,14 +101,14 @@ static void initPeripherals_and_Sensor(void)
 
   servo_initStruct_t servo_initStruct;
   servo_initStruct.servo_channel = SERVO_CHANNEL_ALL;
-  servo_initStruct.angle_min = -60;
-  servo_initStruct.angle_max =  60;
+  servo_initStruct.angle_min = -90;
+  servo_initStruct.angle_max =  90;
   servo_initStruct.pos_zero  =  90;
   ciaa_servo_init(&servo_initStruct);
 
   filter_initStruct_t filter_initStruct;
   filter_initStruct.freq_update = 100;
-  filter_initStruct.weight_of_filter = 0.99;
+  filter_initStruct.weight_of_filter = 0.90f;
   ciaa_filter_init(&filter_initStruct);
 }
 

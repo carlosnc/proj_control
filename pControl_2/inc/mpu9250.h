@@ -104,8 +104,9 @@ static const uint8_t MPU9250_INT_DATA_READY_MSK = 0x01;
 mpu9250_status_t mpu9250_init(mpu9250_InitStruct_t* mpu9250_Init);
 mpu9250_status_t mpu9250_initInterrupt(void);
 mpu9250_status_t mpu9250_reset(void);
-// ToDo: Implement
-mpu9250_status_t mpu9250_getBias(uint8_t samples, uint8_t *pAccel, uint8_t *pGyro);
+
+mpu9250_status_t mpu9250_getBias_int16(uint8_t samples, int16_t *pAccel, int16_t *pGyro);
+mpu9250_status_t mpu9250_getBias_float(uint8_t samples, float32_t *pAccel, float32_t *pGyro);
 mpu9250_status_t mpu9250_getResolution_int16(int16_t *pResolution);
 mpu9250_status_t mpu9250_getResolution_float(float32_t *pResolution);
 

@@ -18,7 +18,7 @@ static volatile int16_t maxAngle = 0;
 static volatile int16_t minAngle = 0;
 
 // =============================================================================
-STATIC INLINE void servo_configChannel(const servo_output_t* servo)
+static inline void servo_configChannel(const servo_output_t* servo)
 {
   uint16_t scu_mode = (SCU_MODE_INACT | SCU_MODE_FUNC1);
 
@@ -83,9 +83,11 @@ void ciaa_servo_check(servo_channel_t servo_channel)
   uint8_t tmpStep = (maxAngle - minAngle)/4;
   float32_t tmpAngle = (float32_t)minAngle;
 
+  ciaa_servo_zeroPosition(servo_channel);
+
   if(servo_channel == SERVO_CHANNEL_ALL)
   {
-    for(uint8_t i = 0; i < SERVO_CHANNEL_ALL; i++)
+    for(uint8_t i = 0; i < 5; i++)
     {
       ciaa_servo_updatePosition((servo_channel_t)i, tmpAngle);
       tmpAngle += tmpStep;
@@ -94,13 +96,15 @@ void ciaa_servo_check(servo_channel_t servo_channel)
   }
   else
   {
-    for (uint8_t i = 0; i < 4; i++)
+    for (uint8_t i = 0; i < 5; i++)
     {
       ciaa_servo_updatePosition(servo_channel, tmpAngle);
       tmpAngle += tmpStep;
       pauseMs(1000);
     }
   }
+
+  ciaa_servo_zeroPosition(servo_channel);
 }
 
 void ciaa_servo_zeroPosition(servo_channel_t servo_channel)
